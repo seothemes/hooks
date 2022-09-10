@@ -73,11 +73,9 @@ remove_hook( 'body_class', 'remove_home_body_class' );
 
 ## Quick setup
 
-Install with composer to your custom plugin or theme:
+Install with composer to your custom plugin or theme, or simply copy and paste the functions from the `hooks.php` file to your project.
 
 `composer require seothemes/hooks`
-
-Or simply copy and paste the functions from the `hooks.php` file to your project.
 
 Once installed, add the following example for testing:
 
