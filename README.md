@@ -1,6 +1,6 @@
 # Hook utility
 
-Allows registering and removing of WordPress hooks with anonymous function like syntax.
+Allows removing of WordPress hooks with anonymous functions.
 
 ## Examples 
 
@@ -39,7 +39,7 @@ addFilter(
 
 ## How it works
 
-Hook objects are stored in the static `$hooks` variable in the `hook_container` function. Hooks be added and removed from the container at any point just like regular hooks.
+Hook objects are stored in the static `$hooks` variable in the `hook_container` function. Hooks can be added and removed from the container at any point just like regular hooks.
 
 The `add_hook` function accepts the same arguments as `add_action` and `add_filter`, with the addition of "alias" as the second argument.
 
@@ -77,8 +77,9 @@ Install with composer to your custom plugin or theme:
 
 `composer require seothemes/hooks`
 
+Or simply copy and paste the functions from the `hooks.php` file to your project.
 
-Add the following example for testing:
+Once installed, add the following example for testing:
 
 ```php
 namespace Company\Project;
@@ -90,4 +91,3 @@ add_hook( 'body_class', 'test', fn( $classes ) => [ ...$classes, 'test' ] );
 remove_hook( 'body_class', 'test' );
 var_dump( hook_container() );
 ```
-
