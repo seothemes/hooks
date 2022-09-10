@@ -72,7 +72,7 @@ remove_hook( 'body_class', 'test' );
 var_dump( hook_container() );
 ```
 
-### Alias
+## Alias
 
 The "alias" argument adds an id to anonymous functions registered with the hook system, allowing them to be removed afterwards.
 
