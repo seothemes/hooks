@@ -21,14 +21,16 @@ if ( ! function_exists( 'hook_container' ) ) {
 		}
 
 		$hook_name = $args[0] ?? '';
-		$alias     = apply_filters( 'hook_alias', $args[1] ?? '' );
+		$alias     = $args[1] ?? '';
 		$callback  = $args[2] ?? null;
-		$priority  = $args[3] ?? null;
+		$priority  = $args[3] ?? 10;
 
-		if ( $action === 'add_hook' && is_int( $priority ) ) {
+		if ( $action === 'add_hook' ) {
 			if ( ! isset( $hooks->{$hook_name} ) ) {
 				$hooks->{$hook_name} = new stdClass();
 			}
+
+			$alias = apply_filters( 'hook_namespace', $alias, $args );
 
 			if ( ! isset( $hooks->{$hook_name}->{$alias} ) ) {
 				$hooks->{$hook_name}->{$alias} = new stdClass();
@@ -37,7 +39,9 @@ if ( ! function_exists( 'hook_container' ) ) {
 			$hooks->{$hook_name}->{$alias}->{$priority} = $callback;
 		}
 
-		if ( $action === 'remove_hook' && isset( $priority ) ) {
+		if ( $action === 'remove_hook' ) {
+			$alias = apply_filters( 'hook_namespace', $alias );
+
 			unset ( $hooks->{$hook_name}->{$alias}->{$priority} );
 		}
 
@@ -60,20 +64,19 @@ if ( ! function_exists( 'add_hook' ) ) {
 	 * @return bool
 	 */
 	function add_hook( string $hook_name, string $alias, Closure $callback, int $priority = 10, int $accepted_args = 1 ): bool {
-		$hooks = hook_container();
-
 		hook_container( __FUNCTION__, $hook_name, $alias, $callback, $priority );
 
 		return add_filter(
 			$hook_name,
-			function () use ( $hook_name, $alias, $callback, $priority, $accepted_args, $hooks ) {
-				$args = func_get_args();
+			function () use ( $hook_name, $alias, $callback, $priority, $accepted_args ) {
+				$args  = func_get_args();
+				$hooks = hook_container();
 
 				if ( isset( $hooks->{$hook_name}->{$alias}->{$priority} ) ) {
-					$args = $callback( ...$args );
+					return $callback( ...$args );
 				}
 
-				return $args;
+				return is_array( $args ) ? $args[0] : $args;
 			},
 			$priority,
 			$accepted_args
