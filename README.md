@@ -70,3 +70,19 @@ The `remove_hook` unregisters the callback from WordPress, and removes the hook 
 ```php
 remove_hook( 'body_class', 'remove_home_body_class' );
 ```
+
+## Quick setup
+
+Add the following to your custom plugin or theme functions to make sure everythings working:
+
+```php
+namespace Company\Project;
+
+require_once __DIR__ . '/vendor/autoload.php'; 
+
+add_filter( 'hook_namespace', fn( string $alias ) : string => __NAMESPACE__ . '\\' . $alias );
+add_hook( 'body_class', 'test', fn( $classes ) => [ ...$classes, 'test' ] );
+remove_hook( 'body_class', 'test' );
+var_dump( hook_container() );
+```
+
