@@ -53,6 +53,25 @@ int     $priority      Hook priority.
 int     $accepted_args Accepted number of arguments.
 ```
 
+## Quick setup
+
+Install with composer to your custom plugin or theme, or simply copy and paste the functions from the `hooks.php` file to your project.
+
+`composer require seothemes/hooks`
+
+Once installed, add the following example for testing:
+
+```php
+namespace Company\Project;
+
+require_once __DIR__ . '/vendor/autoload.php'; 
+
+add_filter( 'hook_namespace', fn( string $alias ) : string => __NAMESPACE__ . '\\' . $alias );
+add_hook( 'body_class', 'test', fn( $classes ) => [ ...$classes, 'test' ] );
+remove_hook( 'body_class', 'test' );
+var_dump( hook_container() );
+```
+
 ### Alias
 
 The "alias" argument adds an id to anonymous functions registered with the hook system, allowing them to be removed afterwards.
@@ -71,23 +90,4 @@ The `remove_hook` unregisters the callback from WordPress, and removes the hook 
 
 ```php
 remove_hook( 'body_class', 'remove_home_body_class' );
-```
-
-## Quick setup
-
-Install with composer to your custom plugin or theme, or simply copy and paste the functions from the `hooks.php` file to your project.
-
-`composer require seothemes/hooks`
-
-Once installed, add the following example for testing:
-
-```php
-namespace Company\Project;
-
-require_once __DIR__ . '/vendor/autoload.php'; 
-
-add_filter( 'hook_namespace', fn( string $alias ) : string => __NAMESPACE__ . '\\' . $alias );
-add_hook( 'body_class', 'test', fn( $classes ) => [ ...$classes, 'test' ] );
-remove_hook( 'body_class', 'test' );
-var_dump( hook_container() );
 ```
