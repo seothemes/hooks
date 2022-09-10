@@ -73,7 +73,12 @@ remove_hook( 'body_class', 'remove_home_body_class' );
 
 ## Quick setup
 
-Add the following to your custom plugin or theme functions to make sure everythings working:
+Install with composer to your custom plugin or theme:
+
+`composer require seothemes/hooks`
+
+
+Add the following example for testing:
 
 ```php
 namespace Company\Project;
