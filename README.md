@@ -7,7 +7,7 @@ Allows removing of WordPress hooks with anonymous functions.
 Standard way of writing hooks:
 
 ```php
-add_filter( 'body_class', 'remove_home_body_class' );
+add_filter( 'body_class', 'remove_home_body_class', 10, 1 );
 function remove_home_body_class( array $classes ): array {
     return array_diff( $classes, [ 'home' ] );
 }
@@ -22,7 +22,7 @@ There are at least two problems with the above example:
 With  the `add_hook` function:
 
 ```php
-add_hook( 'body_class', 'remove_home_body_class', fn( $classes ) => array_diff( $classes, [ 'home' ] ) );
+add_hook( 'body_class', 'remove_home_body_class', fn( $classes ) => array_diff( $classes, [ 'home' ] ), 10, 1 );
 ```
 
 The function names have been reduced to one and anonymous functions can be later removed.
@@ -31,9 +31,11 @@ The syntax also matches the [@wordpress/hooks JS API](https://developer.wordpres
 
 ```php
 addFilter( 
-    'body_class', 
-    'remove_home_body_class', 
-    fn( $classes ) => array_diff( $classes, [ 'home' ] ) 
+    'body_class',
+    'remove_home_body_class',
+    fn( $classes ) => array_diff( $classes, [ 'home' ] ),
+    10,
+    1
 );
 ```
 
@@ -44,11 +46,11 @@ Hook objects are stored in the static `$hooks` variable in the `hook_container` 
 The `add_hook` function accepts the same arguments as `add_action` and `add_filter`, with the addition of "alias" as the second argument.
 
 ```
-string  $hook_name Hook name or array of hook names.
-string  $alias
-Closure $callback
-int     $priority
-int     $accepted_args
+string  $hook_name     Hook name, e.g `init`
+string  $alias         Function alias. Used for hook removal.
+Closure $callback      Actual closure to be called.
+int     $priority      Hook priority.
+int     $accepted_args Accepted number of arguments.
 ```
 
 ### Alias
