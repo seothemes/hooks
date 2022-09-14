@@ -108,3 +108,4 @@ if ( ! function_exists( 'remove_hook' ) ) {
 		return false;
 	}
 }
+

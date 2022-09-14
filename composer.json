@@ -6,5 +6,16 @@
       "name": "Lee Anthony",
       "email": "info@blockifywp.com"
     }
-  ]
+  ],
+  "autoload": {
+    "files": [
+      "hooks.php"
+    ],
+    "psr-4": {
+      "SEOThemes\\Hooks\\": "src/"
+    }
+  },
+  "require": {
+    "php": "^7.4 || ^8.0"
+  }
 }
