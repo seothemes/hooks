@@ -8,12 +8,12 @@ if ( ! function_exists( 'hook_container' ) ) {
 	 *
 	 * @since 1.0.0
 	 *
-	 * @param string $action
+	 * @param string $method  Calling __METHOD__ (add_hook or remove_hook).
 	 * @param mixed  ...$args Hook name, alias, callback and priority.
 	 *
 	 * @return object
 	 */
-	function hook_container( string $action = '', ...$args ): object {
+	function hook_container( string $method = '', ...$args ): object {
 		static $hooks = null;
 
 		if ( ! $hooks ) {
@@ -25,7 +25,7 @@ if ( ! function_exists( 'hook_container' ) ) {
 		$callback  = $args[2] ?? null;
 		$priority  = $args[3] ?? 10;
 
-		if ( $action === 'add_hook' ) {
+		if ( $method === 'add_hook' ) {
 			if ( ! isset( $hooks->{$hook_name} ) ) {
 				$hooks->{$hook_name} = new stdClass();
 			}
@@ -39,7 +39,7 @@ if ( ! function_exists( 'hook_container' ) ) {
 			$hooks->{$hook_name}->{$alias}->{$priority} = $callback;
 		}
 
-		if ( $action === 'remove_hook' ) {
+		if ( $method === 'remove_hook' ) {
 			$alias = apply_filters( 'hook_namespace', $alias );
 
 			unset ( $hooks->{$hook_name}->{$alias}->{$priority} );
@@ -64,7 +64,7 @@ if ( ! function_exists( 'add_hook' ) ) {
 	 * @return bool
 	 */
 	function add_hook( string $hook_name, string $alias, Closure $callback, int $priority = 10, int $accepted_args = 1 ): bool {
-		hook_container( __FUNCTION__, $hook_name, $alias, $callback, $priority );
+		hook_container( __METHOD__, $hook_name, $alias, $callback, $priority );
 
 		return add_filter(
 			$hook_name,
@@ -100,7 +100,7 @@ if ( ! function_exists( 'remove_hook' ) ) {
 		$hooks = hook_container();
 
 		if ( isset( $hooks->{$hook_name}->{$alias}->{$priority} ) ) {
-			hook_container( __FUNCTION__, $hook_name, $alias, $priority );
+			hook_container( __METHOD__, $hook_name, $alias, $priority );
 
 			return true;
 		}
@@ -109,3 +109,26 @@ if ( ! function_exists( 'remove_hook' ) ) {
 	}
 }
 
+if ( ! function_exists( 'addFilter' ) ) {
+	function addFilter( string $hook_name, string $alias, Closure $callback, int $priority = 10, int $accepted_args = 1 ): bool {
+		return add_hook( $hook_name, $alias, $callback, $priority, $accepted_args );
+	}
+}
+
+if ( ! function_exists('addAction') ) {
+	function addAction( string $hook_name, string $alias, Closure $callback, int $priority = 10, int $accepted_args = 1 ) : void {
+		add_hook( $hook_name, $alias, $callback, $priority, $accepted_args );
+	}
+}
+
+if ( ! function_exists('removeFilter')) {
+	function removeFilter( string $hook_name, string $alias, int $priority = 10 ): bool {
+		return remove_hook( $hook_name, $alias, $priority );
+	}
+}
+
+if ( ! function_exists('removeAction')) {
+	function removeAction( string $hook_name, string $alias, int $priority = 10 ): bool {
+		return remove_hook( $hook_name, $alias, $priority );
+	}
+}

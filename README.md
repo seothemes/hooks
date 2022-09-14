@@ -19,15 +19,9 @@ add_filter( 'body_class', 'remove_home_body_class', 10, 1 );
 ```
 
 In the example above, the function name `remove_home_body_class` must be typed twice. IDE's can help with this, but it
-still results in having duplicated code.
+still results in having duplicated code. Also, anonymous functions added using this method cannot be removed later.
 
 Using the hook utility, the above example can be rewritten as follows:
-
-*One Liner*:
-
-```php
-add_hook( 'body_class', 'remove_home_body_class', fn( $classes ) => array_diff( $classes, [ 'home' ] ), 10, 1 );
-```
 
 *Multiline*
 
@@ -59,7 +53,14 @@ addAction(
 );
 ```
 
-The function names have been reduced to one and anonymous functions can be later removed by targeting the given alias.
+*One Liner*:
+
+```php
+add_hook( 'body_class', 'remove_home_body_class', fn( $classes ) => array_diff( $classes, [ 'home' ] ), 10, 1 );
+```
+
+Now the function names have been reduced to one and anonymous functions can be later removed by targeting the given
+alias.
 
 ## How it works
 
@@ -84,6 +85,8 @@ to your project.
 
 `composer require seothemes/hooks`
 
+## Adding hooks
+
 Once installed, add the following example for testing:
 
 ```php
@@ -95,11 +98,14 @@ require_once __DIR__ . '/vendor/autoload.php';
 add_hook( 'body_class', 'add_test_class', fn( $classes ) => [ ...$classes, 'test' ] );
 
 var_dump( hook_container() ); // Should return an array of hook objects.
+```
 
-// Remove
-remove_hook( 'body_class', 'add_test_class' );
+Hooks can be added with any of the provided utility functions:
 
-var_dump( hook_container() ); // Empty.
+```php
+add_hook( 'body_class', 'remove_home_body_class', fn($classes) => $classes );
+addFilter( 'body_class', 'remove_home_body_class', fn($classes) => $classes );
+addAction( 'body_class', 'remove_home_body_class', fn($classes) => $classes );
 ```
 
 ## Removing hooks
@@ -109,18 +115,25 @@ later stage.
 
 Hooks added with the `add_hook` function can only be removed with the `remove_hook` function.
 
-The `remove_hook` unregisters the callback from WordPress, and removes the hook from the container. It accepts the same
-arguments as `remove_action` and `remove_filter`:
+The `remove_hook` function unregisters the callback from WordPress, and removes the hook from the container. It accepts
+the same arguments as `remove_action` and `remove_filter`:
 
 ```php
 remove_hook( 'body_class', 'remove_home_body_class' );
 ```
 
+There are three utility functions provided for removing hooks (they all do the same):
+
+```php
+remove_hook( 'body_class', 'remove_home_body_class' );
+removeFilter( 'body_class', 'remove_home_body_class' );
+removeAction( 'body_class', 'remove_home_body_class' );
+```
+
 ## OOP
 
-An alternative OOP option has been included in this package for those who prefer to use classes instead of functions.
-Classes will be autoloaded when this package has been installed with Composer. All classes are pluggable and won't have
-naming conflicts.
+An alternative OOP option has been included in this package as another example. All classes will be autoloaded when this
+package has been installed with Composer. All classes (and functions) are pluggable to avoid naming conflicts.
 
 The Factory class provides access to a single Hooks instance, add the following line anywhere in your code to get:
 
@@ -153,14 +166,28 @@ $hooks->add( 'body_class', 'add_body_class', function ( $classes ) {
 
 ## Autoprefix aliases
 
-The Container class accepts an optional argument to automatically prefix all aliases with the given string. This is
-useful when you want to remove all hooks added by a specific plugin or theme. Just pass in the namespace when retrieving
-the instance:
+To eliminate even more duplicated code, the hook utility also provides a way to automatically namespace all aliases. This saves adding the namespace to every `add_hook` call.
+
+
+A `hook_namespace` filter is provided but should be used with caution. Most times it is better to set the namespace in `add_hook` directly,
+
+If using OOP, the Container class accepts an optional argument to automatically prefix all aliases within the container with the given string: 
 
 ```php
-$hooks = ( new Factory() )->instance( 
-    new Hooks( 
-        new Container( __NAMESPACE__ ) 
-    ) 
-);
+use SEOThemes\Hooks\Factory;
+use SEOThemes\Hooks\Hooks;
+use SEOThemes\Hooks\Container;
+
+// Inject dependencies.
+$container = new Container( __NAMESPACE__ );
+$hooks     = new Hooks( $container );
+$factory   = new Factory();
+$instance  = $factory->instance( $hooks );
+
+$instance->add('init', 'my_function', fn() => print 'Hello World!' );
+$instance->remove('init', 'my_function' );
+
+// Alternative short syntax.
+( new Factory() )->instance( new Hooks( new Container( 'namespace' ) ) )
+->add( 'init', 'new_function', fn() => print 'Hello World!' );
 ```
