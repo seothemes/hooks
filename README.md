@@ -16,7 +16,7 @@ add_hook( 'init', 'print_hello_world', function() {
     print 'Hello world!';
 } );
 
-// Remove hook with arrow function:
+// Remove hook by alias:
 remove_hook( 'init', 'print_hello_world' );
 ```
 
@@ -209,41 +209,26 @@ $hooks->add( 'body_class', 'add_body_class', function ( $classes ) {
 
 ## Autoprefix aliases
 
-To eliminate even more duplicated code, the hook utility also provides a way to automatically namespace all aliases. This saves adding the namespace to every `add_hook` call.
-
-A `hook_alias` filter has been included but should be used with caution, in case other plugins are also filtering the alias:
+By default, the `add_hook` function does not prefix any aliases. To keep things clean, I recommend creating a namespace `const` to shorten the alias:
 
 ```php
-// Setting namespace directly per function:
-add_hook( 
-    'body_class', 
-    __NAMESPACE__ . '\\remove_home_body_class', 
-    fn( $classes ) => array_diff( $classes, [ 'home' ] ), 
-);
+namespace Company\Project;
 
-// Alternatively, filter the alias:
-add_filter( 'hook_alias', function( string $default, array $args ) : string {
-    return  __NAMESPACE__ . '\\' . $default;
+const NS = __NAMESPACE__ . '\\';
+
+add_hook( 'body_class', NS . 'remove_test_body_class', function ( $classes ) {
+    return array_diff( $classes, [ 'test' ] );
 } );
-
-// Then you can pass the alias without the namespace:
-add_hook( 
-    'body_class', 
-    'remove_home_body_class', 
-    fn( array $classes ) : array => array_diff( $classes, [ 'home' ] ), 
-);
 ```
 
-There are ways to determine if the callback has been added from your project, for example using `debug_backtrace`, but this has not been included in the package.
-
-Another option is to create your own wrapper function, which adds the namespace to every alias:
+Another option is to create your own wrapper function, which prepends the namespace to every alias. This also requires a custom removal function with the same alias:
 
 ```php
 namespace Company\Project;
 
 use Closure;
 
-function addCustomHook( 
+function addNamespacedHook( 
     string $hook_name, 
     string $alias, 
     Closure $callback, 
@@ -258,6 +243,18 @@ function addCustomHook(
         $accepted_args 
     );
 }
+
+function removeNamespacedHook( 
+    string $hook_name, 
+    string $alias, 
+    int $priority = 10 
+    ): bool {
+    return remove_hook( 
+        $hook_name, 
+        __NAMESPACE__ . '\\' . $alias, 
+        $priority 
+    );
+}
 ```
 
 If using OOP, the Container class accepts an optional argument to automatically prefix all aliases within the container with the given string: 
@@ -268,7 +265,7 @@ use SEOThemes\Hooks\Hooks;
 use SEOThemes\Hooks\Container;
 
 // Inject dependencies.
-$container = new Container( __NAMESPACE__ );
+$container = new Container( __NAMESPACE__ . '\\' );
 $hooks     = new Hooks( $container );
 $factory   = new Factory();
 $instance  = $factory->instance( $hooks );
@@ -277,7 +274,7 @@ $instance->add('init', 'my_function', fn() => print 'Hello World!' );
 $instance->remove('init', 'my_function' );
 
 // Alternative short syntax.
-( new Factory() )->instance( new Hooks( new Container( 'namespace' ) ) )
+( new Factory() )->instance( new Hooks( new Container( __NAMESPACE__ . '\\' ) ) )
 ->add( 'init', 'new_function', fn() => print 'Hello World!' );
 ```
 
@@ -303,6 +300,11 @@ $hook_container = [
         ],
         'print_something_else' => [
             10 => fn() => print 'Something else!',
+        ],
+    ],
+    'body_class' => [
+        'add_test_body_class' => [
+            10 => fn( $classes ) => [ ...$classes, 'test' ],
         ],
     ],
 ];
