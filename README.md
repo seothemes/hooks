@@ -6,17 +6,23 @@ There are two separate approaches included, one using only functions, and the ot
 
 ## Features
 
-- Allows later removal of anonymous functions added with the hook container:
+#### Removable anonymous callbacks
+
+Allows later removal of anonymous functions added with the hook container:
 
 ```php
 // Add hook with anonymous arrow function:
-add_hook( 'init', 'print_hello_world', fn() => print 'Hello world!' );
+add_hook( 'init', 'print_hello_world', function() {
+    print 'Hello world!';
+} );
 
 // Remove hook with arrow function:
 remove_hook( 'init', 'print_hello_world' );
 ```
 
-- Allows PHP hooks to match the [@wordpress/hooks JS API](https://developer.wordpress.org/block-editor/reference-guides/packages/packages-hooks/) syntax more closely:
+#### Hooks API syntax
+
+Allows PHP hooks to match the [@wordpress/hooks JS API](https://developer.wordpress.org/block-editor/reference-guides/packages/packages-hooks/) syntax more closely:
 
 ```php
 addFilter( 
@@ -26,6 +32,15 @@ addFilter(
         return array_diff( $classes, [ 'home' ] );
     }
 );
+```
+
+#### Arrow functions
+
+Allows removable arrow functions to be used as callbacks:
+
+```php
+add_hook( 'init', 'print_hello_world', fn() => print 'Hello world!' );
+remove_hook( 'init', 'print_hello_world' );
 ```
 
 ## Installation
