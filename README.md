@@ -2,8 +2,6 @@
 
 Alternative syntax for managing WordPress action and filter hooks.
 
-This project is experimental and is not intended for production use until further testing has been done. It is intended as an example to explore more flexible and minimal ways of writing WordPress hooks for smaller projects that use mostly functional programming.
-
 There are two separate approaches included, one using only functions, and the other using OOP classes. The main purpose of this package is to provide this functionality using only functions, as there are already many OOP approaches to managing hooks. The OOP approach can be used as a comparison, or where it makes sense.
 
 ## Features
@@ -30,30 +28,6 @@ addFilter(
 );
 ```
 
-- Allows automatic namespacing of all callbacks in a project:
-
-```php
-namespace Company\Project;
-
-add_filter( 
-    'hook_alias', 
-    fn( string $alias ) => __NAMESPACE__ . '\\' . $alias
-);
-
-add_hook( 'init', 'print_hello_world', fn() => print 'Hello world!' );
-
-var_dump( hook_container() );
-
-// Var dump results:
-$hook_container_contents = (object) [
-    'init' => [
-        'Company\\Project\\print_hello_world' => [
-            10 => '' // fn() => print 'Hello world!'
-        ],
-    ],
-];
-```
-
 ## Installation
 
 `composer require seothemes/hooks`
@@ -63,6 +37,14 @@ Then load composer in your project:
 ```php
 require_once __DIR__ . '/vendor/autoload.php';
 ```
+
+The functional-only approach can be found in the `hooks.php` file.
+
+The OOP approach can be found in the `src` directory.
+
+Both are separate and can be used exclusively. 
+
+All classes and functions are pluggable as to avoid naming conflicts.
 
 ## Examples
 
@@ -284,7 +266,7 @@ $instance->remove('init', 'my_function' );
 ->add( 'init', 'new_function', fn() => print 'Hello World!' );
 ```
 
-## Hook Container
+## Container Structure
 
 The hook container stores hooks in the following structure to allow for multiple hooks and priorities:
 
@@ -313,4 +295,6 @@ $hook_container = [
 
 ## Testing and contributing
 
-All contributions are welcome. There may be better ways to achieve this that I haven't thought of, so please feel free to submit a pull request or open an issue.
+This project is experimental and is not intended for production use until further testing has been done. It is intended as an example to explore more flexible and minimal ways of writing WordPress hooks for smaller projects that use mostly functional programming.
+
+All contributions are welcome and encouraged. There may be better ways to achieve this that I haven't thought of, so please feel free to submit a pull request or open an issue.
