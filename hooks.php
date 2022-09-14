@@ -25,12 +25,12 @@ if ( ! function_exists( 'hook_container' ) ) {
 		$callback  = $args[2] ?? null;
 		$priority  = $args[3] ?? 10;
 
+		$alias = apply_filters( 'hook_alias', $alias, $args );
+
 		if ( $method === 'add_hook' ) {
 			if ( ! isset( $hooks->{$hook_name} ) ) {
 				$hooks->{$hook_name} = new stdClass();
 			}
-
-			$alias = apply_filters( 'hook_namespace', $alias, $args );
 
 			if ( ! isset( $hooks->{$hook_name}->{$alias} ) ) {
 				$hooks->{$hook_name}->{$alias} = new stdClass();
@@ -40,8 +40,6 @@ if ( ! function_exists( 'hook_container' ) ) {
 		}
 
 		if ( $method === 'remove_hook' ) {
-			$alias = apply_filters( 'hook_namespace', $alias );
-
 			unset ( $hooks->{$hook_name}->{$alias}->{$priority} );
 		}
 

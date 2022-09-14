@@ -122,10 +122,9 @@ the same arguments as `remove_action` and `remove_filter`:
 remove_hook( 'body_class', 'remove_home_body_class' );
 ```
 
-There are three utility functions provided for removing hooks (they all do the same):
+There are two wrapper functions provided for removing hooks (they both do the same):
 
 ```php
-remove_hook( 'body_class', 'remove_home_body_class' );
 removeFilter( 'body_class', 'remove_home_body_class' );
 removeAction( 'body_class', 'remove_home_body_class' );
 ```
@@ -168,8 +167,55 @@ $hooks->add( 'body_class', 'add_body_class', function ( $classes ) {
 
 To eliminate even more duplicated code, the hook utility also provides a way to automatically namespace all aliases. This saves adding the namespace to every `add_hook` call.
 
+A `hook_alias` filter has been included but should be used with caution, in case other plugins are also filtering the alias:
 
-A `hook_namespace` filter is provided but should be used with caution. Most times it is better to set the namespace in `add_hook` directly,
+```php
+// Setting namespace directly per function:
+add_hook( 
+    'body_class', 
+    __NAMESPACE__ . '\\remove_home_body_class', 
+    fn( $classes ) => array_diff( $classes, [ 'home' ] ), 
+);
+
+// Alternatively, filter the alias:
+add_filter( 'hook_alias', function( string $default, array $args ) : string {
+    return  __NAMESPACE__ . '\\' . $default;
+} );
+
+// Then you can pass the alias without the namespace:
+add_hook( 
+    'body_class', 
+    'remove_home_body_class', 
+    fn( array $classes ) : array => array_diff( $classes, [ 'home' ] ), 
+);
+```
+
+There are ways to determine if the callback has been added from your project,
+for example using `debug_backtrace`, but this has not been included in the package.
+
+Another option is to create your own wrapper function, which adds the namespace to every alias:
+
+```php
+namespace Company\Project;
+
+use Closure;
+
+function addCustomHook( 
+    string $hook_name, 
+    string $alias, 
+    Closure $callback, 
+    int $priority = 10, 
+    int $accepted_args = 1 
+    ): bool {
+		return add_hook( 
+		    $hook_name, 
+		    __NAMESPACE__ . '\\' . $alias, 
+		    $callback, 
+		    $priority, 
+		    $accepted_args 
+		);
+	}
+```
 
 If using OOP, the Container class accepts an optional argument to automatically prefix all aliases within the container with the given string: 
 
